@@ -1,4 +1,4 @@
-#pageVoiture .container {
+/* #pageVoiture .container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
@@ -18,27 +18,27 @@ img.voiture-photo {
 }
 
 /* Styles des articles */
-#pageVoiture article.colonne {
+/* #pageVoiture article.colonne {
     display: flex;
     flex-direction: column;
     padding: 0; /* Suppression du padding pour éviter les espaces */
-    background: lightblue;
+    /* background: lightblue;
     border: 1px solid black;
     border-radius: 5px;
     height: 100%; 
-}
+} */
 
 /* Options */
-#pageVoiture .options {
+/* #pageVoiture .options {
     max-width: 600px;
     width: 90%;
     margin: auto;
     background: #f4f4f4;
     padding: 20px;
     border-radius: 10px;
-}
+} */
 
-#pageVoiture h2 {
+/* #pageVoiture h2 {
     color: #333;
 }
 
@@ -46,25 +46,25 @@ img.voiture-photo {
     display: block;
     margin: 10px auto;
     font-size: 18px;
-}
+} */
 
 /* Panier */
-#pageVoiture .panier-container {
+/* #pageVoiture .panier-container {
     margin-top: 20px;
     border: 1px solid #ccc;
     padding: 10px;
     width: 100%;
     max-width: 300px;
-}
+} */
 
-#panier {
+/* #panier {
     list-style-type: none;
     padding: 0;
 }
 
 #panier li {
     margin-bottom: 10px;
-}
+}  */
 
 .car-item {
     width: 100%; /* Pour les petits écrans */
@@ -134,4 +134,22 @@ footer {
 
 .mentions{
     cursor: pointer;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.carousel-item img {
+    object-fit: cover;
+    height: 400px;
+}
+
+.modal-body img {
+    max-height: 90vh;
+    object-fit: contain;
+}
+
+.modal-xl {
+    max-width: 90vw;
 }

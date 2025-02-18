@@ -60,21 +60,42 @@ $photos = getCarPhotos($id_voiture);
 ?>
 <div id="pageVoiture">
     <div class="container min-vh-100 d-flex justify-content-center align-items-center">
-        <div class="row w-75 d-flex align-items-stretch"> <!-- Assure que les colonnes sont bien alignées -->
-            <!-- Colonne gauche : Carrousel des photos -->
+        <div class="row w-75 d-flex align-items-stretch">
+            <!-- Colonne gauche : Carrousel -->
             <div class="col-md-6">
                 <div class="card p-3 w-100 h-100">
                     <div id="carrouselVoiture" class="carousel slide" data-bs-ride="carousel">
+                        <!-- Indicateurs -->
+                        <div class="carousel-indicators">
+                            <?php if (!empty($photos) && is_array($photos)) : ?>
+                                <?php foreach ($photos as $index => $photo) : ?>
+                                    <button type="button" 
+                                            data-bs-target="#carrouselVoiture" 
+                                            data-bs-slide-to="<?= $index ?>" 
+                                            <?= $index === 0 ? 'class="active"' : '' ?>>
+                                    </button>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Images du carrousel -->
                         <div class="carousel-inner">
                             <?php if (!empty($photos) && is_array($photos)) : ?>
                                 <?php foreach ($photos as $index => $photo) : ?>
                                     <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
-                                        <img src="img/<?= htmlspecialchars($photo['photo']) ?>" alt="Voiture" class="voiture-photo d-block w-100">
+                                        <img src="img/<?= htmlspecialchars($photo['photo']) ?>" 
+                                             alt="Voiture" 
+                                             class="voiture-photo d-block w-100 cursor-pointer"
+                                             data-bs-toggle="modal"
+                                             data-bs-target="#imageModal"
+                                             onclick="updateModalImage(this.src)">
                                     </div>
                                 <?php endforeach; ?>
                             <?php else : ?>
                                 <div class="carousel-item active">
-                                    <img src="img/default.jpg" alt="Photo non disponible" class="voiture-photo d-block w-100">
+                                    <img src="img/default.jpg" 
+                                         alt="Photo non disponible" 
+                                         class="voiture-photo d-block w-100">
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -92,11 +113,10 @@ $photos = getCarPhotos($id_voiture);
                 </div>
             </div>
 
-            <!-- Colonne droite : Personnalisation -->
+            <!-- Colonne droite : Personnalisation (inchangée) -->
             <div class="col-md-6">
                 <div class="card p-4 w-100 h-100">
                     <h2 class="mb-3 text-center">Personnalisez votre voiture</h2>
-
                     <label for="couleur" class="form-label">Couleur :</label>
                     <select id="couleur" class="form-select mb-2">
                         <?php foreach ($couleurs as $couleur) : ?>
@@ -130,8 +150,19 @@ $photos = getCarPhotos($id_voiture);
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body p-0">
+                <img id="modalImage" src="" alt="Image agrandie" class="w-100">
+            </div>
+        </div>
     </div>
 </div>
+
 
 
 
