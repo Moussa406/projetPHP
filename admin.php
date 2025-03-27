@@ -15,7 +15,6 @@ if (isset($_SESSION['theme']) and $_SESSION["theme"] != "") {
     $theme = $_SESSION["theme"];
 }
 
-
 $voitures = getVoitures($pdo);
 
 if ($voitures['success']) {
@@ -25,6 +24,11 @@ if ($voitures['success']) {
 ?>
 <!-- Début du contenu de la page -->
 <div class="container d-flex flex-column justify-content-center align-items-center vh-100">
+    <?php if (isset($_GET['message'])) : ?>
+        <div class="alert alert-success mb-3" role="alert">
+            <?php echo htmlspecialchars($_GET['message']); ?>
+        </div>
+    <?php endif; ?>
     <div class="card p-4 border admin bg-light">
         <h4 class="card-title text-center">Admin</h4>
         <div class="form-group mb-2">

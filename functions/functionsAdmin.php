@@ -53,41 +53,75 @@ function ajoutValue($pdo, $item, $values)
     return $pdo;
 }
 
-function ajoutVoiture($pdo, $nom, $type, $marque, $description, $date)
+function ajoutVoiture($pdo, $nom, $type, $marque, $description, $date, $lePrix)
 {
+    echo "<h3>Dans ajoutVoiture (functionsAdmin.php):</h3>";
+    echo "nom: $nom<br>";
+    echo "type: $type<br>";
+    echo "marque: $marque<br>";
+    echo "date: $date<br>";
+    echo "prix: $lePrix<br>";
+    echo "Prix après conversion: " . floatval($lePrix) . "<br>";
+    
     try {
         // Préparation de la requête
-        $sql = "INSERT INTO voitures (nom, id_type, id_marque, description, date_sortie) VALUES (:nom, :id_type, :id_marque, :description, :date_sortie)";
+        $sql = "INSERT INTO voitures (nom, id_type, id_marque, description, date_sortie, prix) VALUES (:nom, :id_type, :id_marque, :description, :date_sortie, :lePrix)";
+        echo "Requête SQL: $sql<br>";
+        
         $stmt = $pdo->prepare($sql);
-
-        // Exécution de la requête avec les paramètres
-        $result = $stmt->execute([
+        
+        // Paramètres pour l'exécution
+        $params = [
             ':nom' => $nom,
             ':id_type' => $type,
             ':id_marque' => $marque,
             ':description' => $description,
-            ':date_sortie' => $date
-        ]);
-
+            ':date_sortie' => $date,
+            ':lePrix' => floatval($lePrix)
+        ];
+        
+        echo "<pre>Paramètres d'exécution: ";
+        print_r($params);
+        echo "</pre>";
+        
+        // Exécution de la requête avec les paramètres
+        $result = $stmt->execute($params);
+        
+        echo "Résultat de l'exécution: " . ($result ? "SUCCÈS" : "ÉCHEC") . "<br>";
+        
         if ($result) {
+            $lastId = $pdo->lastInsertId();
+            echo "Dernier ID inséré: $lastId<br>";
+            
             $response = [
-                'sucess' => true,
-                'message' => "L'ajout de voiture à réussi",
-                'value' => $pdo->lastInsertId()
+                'success' => true,
+                'message' => "L'ajout de voiture a réussi",
+                'value' => $lastId
             ];
-            //$message = true;
         } else {
+            $errorInfo = $stmt->errorInfo();
+            echo "<pre>Erreur SQL: ";
+            print_r($errorInfo);
+            echo "</pre>";
+            
             $response = [
-                'sucess' => false,
-                'message' => "L'ajout de voiture à échoué"
+                'success' => false,
+                'message' => "L'ajout de voiture a échoué: " . $errorInfo[2]
             ];
         }
     } catch (PDOException $e) {
+        echo "Exception PDO: " . $e->getMessage() . "<br>";
+        
         $response = [
-            'sucess' => false,
-            'message' => "Erreur BDD : " . $e
+            'success' => false,
+            'message' => "Erreur BDD : " . $e->getMessage()
         ];
     }
+    
+    echo "<pre>Réponse finale: ";
+    print_r($response);
+    echo "</pre>";
+    
     return $response;
 }
 
@@ -107,20 +141,20 @@ function ajoutOptionVoiture($pdo, $table, $idVoiture, $nomOption, $idOption, $pr
 
         if ($result) {
             $response = [
-                'sucess' => true,
-                'message' => "L'ajout de l'option à réussie'"
+                'success' => true,
+                'message' => "L'ajout de l'option a réussi"
             ];
             //$message = true;
         } else {
             $response = [
-                'sucess' => false,
-                'message' => "L'ajout de l'option à échoué"
+                'success' => false,
+                'message' => "L'ajout de l'option a échoué"
             ];
         }
     } catch (PDOException $e) {
         $response = [
-            'sucess' => false,
-            'message' => "Erreur BDD : " . $e
+            'success' => false,
+            'message' => "Erreur BDD : " . $e->getMessage()
         ];
     }
     return $response;
@@ -139,21 +173,21 @@ function ajoutPhoto($pdo, $name)
 
         if ($result) {
             $response = [
-                'sucess' => true,
-                'message' => "L'ajout de la photo à réussi",
+                'success' => true,
+                'message' => "L'ajout de la photo a réussi",
                 'value' => $pdo->lastInsertId()
             ];
             //$message = true;
         } else {
             $response = [
-                'sucess' => false,
-                'message' => "L'ajout de la photo à échoué"
+                'success' => false,
+                'message' => "L'ajout de la photo a échoué"
             ];
         }
     } catch (PDOException $e) {
         $response = [
-            'sucess' => false,
-            'message' => "Erreur BDD : " . $e
+            'success' => false,
+            'message' => "Erreur BDD : " . $e->getMessage()
         ];
     }
     return $response;
@@ -174,20 +208,20 @@ function ajoutPhotoVoiture($pdo, $idVoiture, $idPhoto)
 
         if ($result) {
             $response = [
-                'sucess' => true,
-                'message' => "L'ajout a réussie'"
+                'success' => true,
+                'message' => "L'ajout a réussi"
             ];
             //$message = true;
         } else {
             $response = [
-                'sucess' => false,
+                'success' => false,
                 'message' => "L'ajout a échoué"
             ];
         }
     } catch (PDOException $e) {
         $response = [
-            'sucess' => false,
-            'message' => "Erreur BDD : " . $e
+            'success' => false,
+            'message' => "Erreur BDD : " . $e->getMessage()
         ];
     }
     return $response;

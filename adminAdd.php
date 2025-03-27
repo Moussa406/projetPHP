@@ -99,6 +99,12 @@ initialisation();
                 </div>
             </div>
             <div class="col-md-2">
+            <div class="form-group mb-1">
+                    <label class="form-label" for="inputprix">Prix</label>
+                    <input id="inputPrix" class="form-control" type="text" name="lePrix" required >
+                </div>
+            </div>
+            <div class="col-md-2">
                 <div class="form-group mb-1">
                     <label class="form-label" for="selectType">Type</label>
                     <select class="form-control" name="type" id="selectType">

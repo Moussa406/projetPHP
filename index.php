@@ -10,15 +10,14 @@ $types = getItem($pdo, 'types'); // Récupère les types de véhicules
 
 
 $sql = "SELECT v.ID AS voiture_id, v.nom AS voiture_nom, v.description, v.date_sortie, 
-       m.nom AS marque_nom, t.nom AS type_nom, mo.nom AS moteur_nom, MAX(p.nom) AS photo_nom
+       m.nom AS marque_nom, t.nom AS type_nom, mo.nom AS moteur_nom, p.nom AS photo_nom, v.prix
 FROM voitures v
 INNER JOIN marques m ON v.id_marque = m.ID
 INNER JOIN types t ON v.id_type = t.ID
 INNER JOIN voitures_moteurs vm ON v.ID = vm.id_voiture
 INNER JOIN moteurs mo ON vm.id_moteur = mo.ID
 LEFT JOIN voitures_photos vp ON v.ID = vp.id_voiture
-LEFT JOIN photos p ON vp.id_photo = p.ID
-GROUP BY v.ID, v.nom, v.description, v.date_sortie, m.nom, t.nom, mo.nom";
+LEFT JOIN photos p ON vp.id_photo = p.ID";
 
 
 
@@ -32,8 +31,24 @@ $typesSelectionnes = $_GET['types'] ?? [];
 $marquesSelectionnees = $_GET['marques'] ?? [];
 $moteursSelectionnes = $_GET['moteurs'] ?? [];
 
-// Filtrer les voitures
-$voituresFiltrees = array_filter($voitures, function ($voiture) use ($typesSelectionnes, $marquesSelectionnees, $moteursSelectionnes) {
+$voituresFiltrees = array();
+foreach ($voitures as $voiture) {
+    $voitureId = $voiture['voiture_id'];
+    
+    // Si la voiture n'existe pas encore dans le tableau, on l'ajoute
+    if (!isset($voituresFiltrees[$voitureId])) {
+        $voituresFiltrees[$voitureId] = $voiture;
+        $voituresFiltrees[$voitureId]['photos'] = array();
+    }
+    
+    // On ajoute la photo si elle existe
+    if (!empty($voiture['photo_nom'])) {
+        $voituresFiltrees[$voitureId]['photos'][] = $voiture['photo_nom'];
+    }
+}
+
+// Appliquer les filtres
+$voituresFiltrees = array_filter($voituresFiltrees, function ($voiture) use ($typesSelectionnes, $marquesSelectionnees, $moteursSelectionnes) {
     $typeMatch = empty($typesSelectionnes) || (isset($voiture['type_nom']) && in_array($voiture['type_nom'], $typesSelectionnes));
     $marqueMatch = empty($marquesSelectionnees) || (isset($voiture['marque_nom']) && in_array($voiture['marque_nom'], $marquesSelectionnees));
     $moteurMatch = empty($moteursSelectionnes) || (isset($voiture['moteur_nom']) && in_array($voiture['moteur_nom'], $moteursSelectionnes));
@@ -111,17 +126,19 @@ $voituresFiltrees = array_filter($voitures, function ($voiture) use ($typesSelec
                         </div>
                         <?php foreach ($voituresFiltrees as $voiture) : ?>
                             <div class="car-item card mt-3 col-md-5 mx-md-1 border">
-                                <img src="img/<?php echo($voiture['photo_nom'] ?? 'default.jpg'); ?>" class="card-img-top shadow" alt="<?php echo($voiture['voiture_nom'] ?? ''); ?>">
+                                <img src="img/<?php echo(!empty($voiture['photos']) ? htmlspecialchars($voiture['photos'][0]) : 'default.jpg'); ?>" 
+                                     class="card-img-top shadow" 
+                                     alt="<?php echo htmlspecialchars($voiture['voiture_nom']); ?>">
                                 <div class="card-body">
-                                    <h5 class="card-title"><?php echo($voiture['voiture_nom'] ?? ''); ?></h5>
-                                    <p class="card-text"><?php echo($voiture['description'] ?? ''); ?></p>
-                                    <p><strong>Marque :</strong> <?php echo($voiture['marque_nom'] ?? ''); ?></p>
-                                    <p><strong>Date de sortie :</strong> <?php echo ($voiture['date_sortie'] ?? ''); ?></p>
-                                    <p><strong>Moteur :</strong> <?php echo($voiture['moteur_nom'] ?? ''); ?></p>
+                                    <h5 class="card-title"><?php echo htmlspecialchars($voiture['voiture_nom']); ?></h5>
+                                    <p class="card-text"><?php echo htmlspecialchars($voiture['description']); ?></p>
+                                    <p><strong>Marque :</strong> <?php echo htmlspecialchars($voiture['marque_nom']); ?></p>
+                                    <p><strong>Date de sortie :</strong> <?php echo htmlspecialchars($voiture['date_sortie']); ?></p>
+                                    <p><strong>Moteur :</strong> <?php echo htmlspecialchars($voiture['moteur_nom']); ?></p>
+                                    <p><strong>Prix :</strong> <?php echo htmlspecialchars($voiture['prix']); ?> €</p>
                                     <a href="voiture.php?idVoiture=<?php echo $voiture['voiture_id'] ?>" class="btn btn-primary">Voir plus</a>
                                 </div>
                             </div>
-
                         <?php endforeach; ?>
                     </div>
                 </div>

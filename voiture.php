@@ -5,6 +5,16 @@ require_once 'includes/header.php';
 
 $id_voiture = $_GET['idVoiture']; // Correction du paramètre
 
+// Récupération du prix de la voiture
+$pdo = getDBConnection();
+$sql = "SELECT prix FROM voitures WHERE ID = :id_voiture";
+$stmt = $pdo->prepare($sql);
+$stmt->execute(['id_voiture' => $id_voiture]);
+$prixVoiture = $stmt->fetch(PDO::FETCH_ASSOC)['prix'] ?? 0;
+
+// Débogage du prix
+echo "<!-- Prix de la voiture: " . $prixVoiture . " -->";
+
 //Recupere les informations des voitures depuis la page index.php
 function getVoitureCaracteristiques($id_voiture, $caracteristique) {
     try {
@@ -63,7 +73,7 @@ $photos = getCarPhotos($id_voiture);
         <div class="row w-75 d-flex align-items-stretch">
             <!-- Colonne gauche : Carrousel -->
             <div class="col-md-6">
-                <div class="card p-3 w-100 h-100">
+                <div class="card p-3 w-100 h-100 border bg-light">
                     <div id="carrouselVoiture" class="carousel slide" data-bs-ride="carousel">
                         <!-- Indicateurs -->
                         <div class="carousel-indicators">
@@ -115,10 +125,11 @@ $photos = getCarPhotos($id_voiture);
 
             <!-- Colonne droite : Personnalisation (inchangée) -->
             <div class="col-md-6">
-                <div class="card p-4 w-100 h-100">
+                <div class="card p-4 w-100 h-100 border bg-light">
                     <h2 class="mb-3 text-center">Personnalisez votre voiture</h2>
                     <label for="couleur" class="form-label">Couleur :</label>
                     <select id="couleur" class="form-select mb-2">
+                        <option value="" disabled selected>Sélectionnez une couleur</option>
                         <?php foreach ($couleurs as $couleur) : ?>
                             <option value="<?= $couleur['id_couleur'] ?>" data-price="<?= $couleur['prix']; ?>">
                                 <?= $couleur['nom'] . ' (+ ' . $couleur['prix'] . '€)'; ?>
@@ -128,6 +139,7 @@ $photos = getCarPhotos($id_voiture);
 
                     <label for="jantes" class="form-label">Jantes :</label>
                     <select id="jantes" class="form-select mb-2">
+                        <option value="" disabled selected>Sélectionnez des jantes</option>
                         <?php foreach ($jantes as $jante) : ?>
                             <option value="<?= $jante['id_jante'] ?>" data-price="<?= $jante['prix']; ?>">
                                 <?= $jante['nom'] . ' (+ ' . $jante['prix'] . '€)'; ?>
@@ -137,6 +149,7 @@ $photos = getCarPhotos($id_voiture);
 
                     <label for="motorisation" class="form-label">Motorisation :</label>
                     <select id="motorisation" class="form-select mb-2">
+                        <option value="" disabled selected>Sélectionnez une motorisation</option>
                         <?php foreach ($moteurs as $moteur) : ?>
                             <option value="<?= $moteur['id_moteur'] ?>" data-price="<?= $moteur['prix']; ?>">
                                 <?= $moteur['nom'] . ' (+ ' . $moteur['prix'] . '€)'; ?>
@@ -145,7 +158,7 @@ $photos = getCarPhotos($id_voiture);
                     </select>
 
                     <div id="panier" class="mt-3"></div>
-                    <button id="ajouter" class="btn btn-primary w-100 mt-3">Ajouter au panier</button>
+                    <!--<button id="ajouter" class="btn btn-primary w-100 mt-3">Ajouter au panier</button> -->
                     <h3 class="text-center mt-3">Total: <span id="total">0</span>€</h3>
                 </div>
             </div>
@@ -179,5 +192,10 @@ $photos = getCarPhotos($id_voiture);
         <button type="submit">Publier l'avis</button>
     </form>
 </div> -->
+<script>
+    // Débogage du prix dans la console
+    console.log('Prix de la voiture:', <?php echo $prixVoiture; ?>);
+    window.PRIX_BASE = <?php echo $prixVoiture; ?>;
+</script>
 <script src="script.js"></script>
 <?php require_once 'includes/footer.php'; ?>
