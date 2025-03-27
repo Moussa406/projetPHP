@@ -3,6 +3,10 @@ $pageTitle = "Page Admin";
 require_once 'includes/header.php';
 require_once 'functions/functionsAdmin.php';
 
+// Connection à la base de données
+require_once 'connection.php';
+$pdo = getDBConnection();
+
 // Vérification si est admin
 if ($_SESSION["admin"] === 1) {
 } else {
@@ -27,6 +31,8 @@ function checkRequiredFields($requiredFields)
 $couleurs = [];
 $jantes = [];
 $motorisation = [];
+$marques = [];
+$types = [];
 $description = null;
 $model = null;
 $marque = null;
@@ -70,36 +76,49 @@ function genererBlocSelection($titre, $elements, $elementsAssocies, $type)
     echo "<div class='col-md-4'>";
     echo "<div class='card p-3 admin'>";
     echo "<h6 class='card-title'>$titre</h6>";
-    echo "<div class='form-group'>";
-    echo "<select class='form-control' name='{$type}[]' multiple>";
+    
     foreach ($elements as $key => $value) {
-        $selected = in_array($key, $elementsAssocies) ? 'selected' : '';
-        echo "<option value='$key' $selected>$value</option>";
+        $checked = array_key_exists($key, $elementsAssocies) ? 'checked' : '';
+        $prix = array_key_exists($key, $elementsAssocies) ? $elementsAssocies[$key] : 0;
+        
+        echo '<div class="form-check d-flex">';
+        echo "<input class='form-check-input me-2' type='checkbox' id='{$titre}$key' name='{$type}[$key]' value='$key' $checked>";
+        echo "<label class='form-check-label' for='{$titre}$key'>$value</label>";
+        echo '</div>';
+        echo '<div class="form-group mb-2 d-flex align-items-center">';
+        echo "<input class='form-control' type='number' name='prix{$type}[$key]' value='$prix' min='0'>";
+        echo '<span class="ms-2">€</span>';
+        echo '</div>';
     }
-    echo "</select>";
-    echo "</div>";
-    echo "</div>";
-    echo "</div>";
+    
+    echo '</div>';
+    echo '</div>';
 }
 
 //Chargement des données des tables
-function initialisation()
+function initialisation($id)
 {
-    global $couleurs, $jantes, $motorisation, $moteursAssocies, $couleursAssocies, $jantesAssocies;
+    global $pdo, $couleurs, $jantes, $motorisation, $moteursAssocies, $couleursAssocies, $jantesAssocies, $marques, $types;
     $couleurs = chargeItemBdd("couleurs");
     $jantes = chargeItemBdd("jantes");
     $motorisation = chargeItemBdd("moteurs");
+    $marques = chargeItemBdd("marques");
+    $types = chargeItemBdd("types");
     $moteursAssocies = getVoitureOptions($pdo, $id, "voitures_moteurs", "id_moteur");
     $couleursAssocies = getVoitureOptions($pdo, $id, "voitures_couleurs", "id_couleur");
     $jantesAssocies = getVoitureOptions($pdo, $id, "voitures_jantes", "id_jante");
 }
 
-initialisation();
+// Appel de la fonction avec l'ID
+$id = $_GET['id'] ?? null;
+if ($id) {
+    initialisation($id);
+}
 ?>
 
 <!-- Début du contenu de la page -->
-<div class="d-flex justify-content-center align-items-center vh-100">
-    <div class="card p-3 border bg-light admin">
+<div class="d-flex justify-content-center my-4">
+    <div class="card p-3 border bg-light admin w-100">
         <h4 class="card-title">Modifier les "<b><?php echo $marque . ' ' . $model ?></b>" dans la BDD</h4>
         <div class="form-group mb-1">
             <form action="adminEditResult.php" method="post" enctype="multipart/form-data">
@@ -124,7 +143,7 @@ initialisation();
                     <div class="col-md-2">
                         <div class="form-group mb-2">
                             <label class="form-label" for="inputPrix">Prix</label>
-                            <input class="form-control" name="lePrix" id="inputPrix" type="number" step="0.01" value="<?php echo htmlspecialchars($prix) ?>" required>
+                            <input class="form-control" name="lePrix" id="inputPrix" type="number" step="0.01" value="<?php echo htmlspecialchars($prix ?? '0'); ?>" required>
                         </div>
                     </div>
                     <div class="col-md-2">

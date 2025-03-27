@@ -13,6 +13,10 @@ $idVoiture = null;
 
 if (isset($_POST['id']) and $_POST['id'] != "") {
     $idVoiture = $_POST['id'];
+    
+    // Mise à jour des informations de base de la voiture
+    updateVoitureInfos($pdo, $idVoiture);
+    
     if (isset($_POST['moteur'])) {
         echo "moteur";
         updateVoitureOptions($pdo, $idVoiture, 'moteur', $_POST);
@@ -30,6 +34,7 @@ if (isset($_POST['id']) and $_POST['id'] != "") {
         delVoitureOptions($pdo, $idVoiture, "voitures_jantes");
     }
     updateVoitureDescription($pdo, $idVoiture);
+    
     header("Location:admin.php");
     exit();
 }
@@ -42,6 +47,56 @@ function updateVoitureDescription($pdo, $idVoiture){
                    WHERE ID = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$txt, $idVoiture]);
+    }
+}
+
+function updateVoitureInfos($pdo, $idVoiture) {
+    echo "<h3>Debug updateVoitureInfos:</h3>";
+    echo "POST data: ";
+    var_dump($_POST);
+    
+    if (isset($_POST['model'], $_POST['marque'], $_POST['type'], $_POST['date'], $_POST['lePrix'])) {
+        $sql = "UPDATE voitures 
+                SET nom = ?,
+                    id_type = ?,
+                    id_marque = ?,
+                    date_sortie = ?,
+                    prix = ?
+                WHERE ID = ?";
+        
+        echo "<br>SQL Query: " . $sql;
+        echo "<br>Parameters: ";
+        $params = [
+            $_POST['model'],
+            $_POST['type'],
+            $_POST['marque'],
+            $_POST['date'],
+            $_POST['lePrix'],
+            $idVoiture
+        ];
+        var_dump($params);
+        
+        try {
+            $stmt = $pdo->prepare($sql);
+            $result = $stmt->execute($params);
+            echo "<br>Update result: ";
+            var_dump($result);
+            
+            if (!$result) {
+                echo "<br>PDO Error Info: ";
+                var_dump($stmt->errorInfo());
+            }
+        } catch (PDOException $e) {
+            echo "<br>PDO Exception: " . $e->getMessage();
+        }
+    } else {
+        echo "<br>Missing required fields!";
+        echo "<br>Required fields status:";
+        echo "<br>model: " . isset($_POST['model']);
+        echo "<br>marque: " . isset($_POST['marque']);
+        echo "<br>type: " . isset($_POST['type']);
+        echo "<br>date: " . isset($_POST['date']);
+        echo "<br>lePrix: " . isset($_POST['lePrix']);
     }
 }
 

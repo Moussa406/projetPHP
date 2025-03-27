@@ -7,13 +7,18 @@ $id_voiture = $_GET['idVoiture']; // Correction du paramètre
 
 // Récupération du prix de la voiture
 $pdo = getDBConnection();
-$sql = "SELECT prix FROM voitures WHERE ID = :id_voiture";
+$sql = "SELECT v.prix, v.nom, m.nom as marque 
+        FROM voitures v 
+        LEFT JOIN marques m ON v.id_marque = m.ID 
+        WHERE v.ID = :id_voiture";
 $stmt = $pdo->prepare($sql);
 $stmt->execute(['id_voiture' => $id_voiture]);
-$prixVoiture = $stmt->fetch(PDO::FETCH_ASSOC)['prix'] ?? 0;
+$voiture = $stmt->fetch(PDO::FETCH_ASSOC);
+$prixVoiture = $voiture['prix'] ?? 0;
 
-// Débogage du prix
-echo "<!-- Prix de la voiture: " . $prixVoiture . " -->";
+// Débogage des valeurs
+error_log("ID Voiture: " . $id_voiture);
+error_log("Prix récupéré: " . print_r($prixVoiture, true));
 
 //Recupere les informations des voitures depuis la page index.php
 function getVoitureCaracteristiques($id_voiture, $caracteristique) {
@@ -193,9 +198,13 @@ $photos = getCarPhotos($id_voiture);
     </form>
 </div> -->
 <script>
-    // Débogage du prix dans la console
-    console.log('Prix de la voiture:', <?php echo $prixVoiture; ?>);
-    window.PRIX_BASE = <?php echo $prixVoiture; ?>;
+    // Initialisation du prix de base avec vérification plus stricte
+    <?php
+    $prixFormatted = is_numeric($prixVoiture) ? number_format((float)$prixVoiture, 2, '.', '') : '0.00';
+    echo "console.log('Prix brut de la BDD:', " . json_encode($prixVoiture) . ");\n";
+    echo "window.PRIX_BASE = parseFloat('" . $prixFormatted . "');\n";
+    echo "console.log('Prix formatté:', window.PRIX_BASE);\n";
+    ?>
 </script>
 <script src="script.js"></script>
 <?php require_once 'includes/footer.php'; ?>

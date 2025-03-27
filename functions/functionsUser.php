@@ -54,19 +54,26 @@ function userConect($pdo, $pseudo, $pass)
 {
     $message = null;
     try {
-        $sql = "SELECT pseudo,nom,prenom, password, admin FROM users WHERE pseudo = :pseudo LIMIT 1";
+        $sql = "SELECT pseudo, nom, prenom, password, admin FROM users WHERE pseudo = :pseudo LIMIT 1";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([':pseudo' => $pseudo]);
 
-
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user) {
-            if (password_verify($pass, $user["password"])) {
-                $_SESSION['nom'] = $user['nom'];
-                $_SESSION['prenom'] = $user['prenom'];
-                $_SESSION['pseudo'] = $user['pseudo'];
-                $_SESSION['admin'] = $user['admin'];
+        if ($user && password_verify($pass, $user["password"])) {
+            // S'assurer que session_start() a été appelé
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            
+            // Initialiser les variables de session
+            $_SESSION['nom'] = $user['nom'];
+            $_SESSION['prenom'] = $user['prenom'];
+            $_SESSION['pseudo'] = $user['pseudo'];
+            $_SESSION['admin'] = $user['admin'];
+            
+            // Vérifier que les variables de session sont bien définies
+            if (isset($_SESSION['pseudo']) && isset($_SESSION['admin'])) {
                 $message = true;
             } else {
                 $message = false;

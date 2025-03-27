@@ -136,7 +136,12 @@ if (checkRequiredFields($requiredFieldsConect)) {
     if(is_string($message)){
         error();
     }elseif($message){
-        returnIndex();
+        // Vérifier que la session est bien initialisée
+        if(isset($_SESSION['pseudo']) && isset($_SESSION['admin'])) {
+            returnIndex();
+        } else {
+            error();
+        }
     }else{
         errorUser();
     }

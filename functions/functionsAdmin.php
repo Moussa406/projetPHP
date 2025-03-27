@@ -340,3 +340,73 @@ function getDescription($pdo, $id){
         ];
     }
 }
+
+function getVoitureDetails($pdo, $id) {
+    try {
+        // Récupération des détails de la voiture
+        $sql = "SELECT v.*, 
+                GROUP_CONCAT(DISTINCT p.ID, ':', p.nom) as photos
+                FROM voitures v
+                LEFT JOIN voitures_photos vp ON v.ID = vp.id_voiture
+                LEFT JOIN photos p ON vp.id_photo = p.ID
+                WHERE v.ID = ?
+                GROUP BY v.ID";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($result) {
+            // Traitement des photos
+            $photos = [];
+            if (!empty($result['photos'])) {
+                $photosList = explode(',', $result['photos']);
+                foreach ($photosList as $photo) {
+                    $photoData = explode(':', $photo);
+                    if (count($photoData) == 2) {
+                        $photos[] = [
+                            'id' => $photoData[0],
+                            'nom' => $photoData[1]
+                        ];
+                    }
+                }
+            }
+            unset($result['photos']);
+            $result['photos'] = $photos;
+            
+            return [
+                'success' => true,
+                'message' => 'Détails de la voiture récupérés avec succès',
+                'data' => $result
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Voiture non trouvée'
+            ];
+        }
+    } catch (PDOException $e) {
+        return [
+            'success' => false,
+            'message' => 'Erreur lors de la récupération des détails : ' . $e->getMessage()
+        ];
+    }
+}
+
+function getVoitureOptions($pdo, $idVoiture, $table, $idColumn) {
+    try {
+        $sql = "SELECT $idColumn, prix FROM $table WHERE id_voiture = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$idVoiture]);
+        
+        // Récupérer tous les IDs des options et leurs prix
+        $options = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $options[$row[$idColumn]] = $row['prix'];
+        }
+        
+        return $options;
+    } catch (PDOException $e) {
+        return [];
+    }
+}
