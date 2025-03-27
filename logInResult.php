@@ -132,17 +132,21 @@ if (checkRequiredFields($requiredFieldsNewUser)) {
 if (checkRequiredFields($requiredFieldsConect)) {
     setValues();
     $message = userConect($pdo, $pseudo, $pass);
-    // Si une erreur est arrivé
+    // Si une erreur est arrivée
     if(is_string($message)){
         error();
-    }elseif($message){
+    } elseif($message) {
         // Vérifier que la session est bien initialisée
         if(isset($_SESSION['pseudo']) && isset($_SESSION['admin'])) {
+            // Ajouter un log pour le débogage
+            error_log("Session initialisée avec succès. Pseudo: " . $_SESSION['pseudo'] . ", Admin: " . $_SESSION['admin']);
             returnIndex();
         } else {
+            error_log("Échec de l'initialisation de la session");
+            $_SESSION["newUser_errorPseudo"] = "Erreur lors de l'initialisation de la session";
             error();
         }
-    }else{
+    } else {
         errorUser();
     }
 }

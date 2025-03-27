@@ -1,16 +1,25 @@
 <?php
-session_start();
+// S'assurer que la session est démarrée
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Connection à la base de données
 define('SECURE_ACCESS', true);
 require_once 'connection.php';
 $pdo = getDBConnection();
 
-
 $admin = false;
-if (isset($_SESSION['admin']) and $_SESSION["admin"] === 1) {
+if (isset($_SESSION['admin']) && $_SESSION['admin'] === 1) {
     $admin = true;
+}
+
+if(isset($_SESSION['nom']) && $_SESSION['nom'] !== ""){
+    $lien = "logOut.php";
+    $txt = "LogOut";
 } else {
-    $admin = false;
+    $lien = "logIn.php";
+    $txt = 'LogIn';
 }
 
 if(isset($_SESSION['nom']) and $_SESSION['nom'] != ""){
